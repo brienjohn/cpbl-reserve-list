@@ -179,7 +179,7 @@ async function save(){
   }catch(e){
     toast(e.status===429?"這個網路今天送出太多份名單，請明天再試":"送出失敗，請檢查網路後再試一次");
   }
-  saving=false;renderAll();if(tab==="stats")loadStats();
+  saving=false;renderAll();loadStats(true);
 }
 let armT=0;
 $("clear").onclick=()=>{
@@ -191,9 +191,9 @@ $("clear").onclick=()=>{
 $("save").onclick=save;
 
 // ---------- stats ----------
-async function loadStats(){
+async function loadStats(fresh){
   const code=T.code;
-  try{const j=await api("/stats?team="+code);if(!T||T.code!==code)return;stats=j;online=true}catch(e){if(!stats)stats={error:true}}
+  try{const j=await api("/stats?team="+code+(fresh?"&fresh=1":""));if(!T||T.code!==code)return;stats=j;online=true}catch(e){if(!stats)stats={error:true}}
   if(tab==="stats")renderStats();subCount();
 }
 function renderStats(){
@@ -228,7 +228,7 @@ function setTab(t){
   tab=t;for(const k of["pick","stats"]){$("tab-"+k).setAttribute("aria-selected",String(k===t));$("view-"+k).hidden=k!==t}
   renderAll();store("rl-tab",t);
   clearInterval(statsT);
-  if(t==="stats"){loadStats();statsT=setInterval(()=>{if(!document.hidden)loadStats()},30000)}
+  if(t==="stats"){loadStats();statsT=setInterval(()=>{if(!document.hidden)loadStats()},60000)}
   else if(!stats)loadStats();
 }
 $("tab-pick").onclick=()=>setTab("pick");$("tab-stats").onclick=()=>setTab("stats");
